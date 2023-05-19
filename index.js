@@ -64,13 +64,26 @@ async function run() {
     // get toys data by email in url query
     app.get("/mytoys", async (req, res) => {
       const email = req.query.email;
-      console.log(email)
       const query = { sellerEmail: email };
       const cursor = toysCollection.find(query);
       const toys = await cursor.toArray();
       res.send(toys);
     });
 
+    // update toy data by id
+    app.put("/updatetoy/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedToy = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...updatedToy,
+        },
+      };
+      const result = await toysCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
