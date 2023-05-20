@@ -64,7 +64,19 @@ async function run() {
     // get toys data by email in url query
     app.get("/mytoys", async (req, res) => {
       const email = req.query.email;
+      const isSort = req.query.sort;
+      console.log(isSort);
+      if (isSort != "none") {
+        const options = {
+          sort: { price: isSort == "High" ? -1 : 1 },
+        };
+        const cursor = toysCollection.find({ sellerEmail: email }, options);
+        const toys = await cursor.toArray();
+        res.send(toys);
+        return;
+      }
       const query = { sellerEmail: email };
+
       const cursor = toysCollection.find(query);
       const toys = await cursor.toArray();
       res.send(toys);
