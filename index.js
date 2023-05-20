@@ -11,7 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 // Connection URI
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wqecfea.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wqecfea.mongodb.net/?retryWrites=true&w=majority`;
+
+const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ac-avolrex-shard-00-00.wqecfea.mongodb.net:27017,ac-avolrex-shard-00-01.wqecfea.mongodb.net:27017,ac-avolrex-shard-00-02.wqecfea.mongodb.net:27017/?ssl=true&replicaSet=atlas-eirl29-shard-0&authSource=admin&retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -29,6 +31,10 @@ async function run() {
 
     const toysCollection = client.db("toypalace").collection("toysCollection");
 
+    const indexKeys = { name: 1 };
+    const options = { name: "ToyName" };
+    const result = await toysCollection.createIndex(indexKeys, options);
+
     //add toy data to database
     app.post("/addToy", async (req, res) => {
       const newToy = req.body;
@@ -39,6 +45,8 @@ async function run() {
 
     //get all toys from database
     app.get("/alltoys", async (req, res) => {
+      const search = req.query.search;
+
       const options = {
         projection: {
           name: 1,
@@ -48,6 +56,14 @@ async function run() {
           sellerName: 1,
         },
       };
+      if (search != "") {
+        const query = { name: { $regex: search, $options: "i" } };
+        const cursor = toysCollection.find(query, options);
+        const toys = await cursor.toArray();
+        res.send(toys);
+        return;
+      }
+
       const cursor = toysCollection.find({}, options);
       const toys = await cursor.toArray();
       res.send(toys);
