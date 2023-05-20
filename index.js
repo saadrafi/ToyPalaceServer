@@ -56,7 +56,7 @@ async function run() {
           sellerName: 1,
         },
       };
-      if (search != "") {
+      if (search && search != "") {
         const query = { name: { $regex: search, $options: "i" } };
         const cursor = toysCollection.find(query, options);
         const toys = await cursor.toArray();
@@ -75,6 +75,16 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const toy = await toysCollection.findOne(query);
       res.send(toy);
+    });
+
+    // get toys data by category
+    app.get("/toysCategory/:category", async (req, res) => {
+      const category = req.params.category;
+
+      const query = { subCategory: category };
+      const cursor = toysCollection.find(query);
+      const toys = await cursor.toArray();
+      res.send(toys);
     });
 
     // get toys data by email in url query
