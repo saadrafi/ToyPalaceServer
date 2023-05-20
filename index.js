@@ -32,6 +32,8 @@ async function run() {
     const toysCollection = client.db("toypalace").collection("toysCollection");
     const testimonyCollection = client.db("toypalace").collection("testimonyCollection");
 
+    const blogsCollection = client.db("toypalace").collection("blogCollection");
+
     const indexKeys = { name: 1 };
     const options = { name: "ToyName" };
     const result = await toysCollection.createIndex(indexKeys, options);
@@ -41,6 +43,13 @@ async function run() {
       const cursor = testimonyCollection.find({});
       const testimony = await cursor.toArray();
       res.send(testimony);
+    });
+
+    // get blogs data
+    app.get("/blogs", async (req, res) => {
+      const cursor = blogsCollection.find({});
+      const blogs = await cursor.toArray();
+      res.send(blogs);
     });
 
     //add toy data to database
