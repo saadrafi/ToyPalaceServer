@@ -30,10 +30,18 @@ async function run() {
     await client.connect();
 
     const toysCollection = client.db("toypalace").collection("toysCollection");
+    const testimonyCollection = client.db("toypalace").collection("testimonyCollection");
 
     const indexKeys = { name: 1 };
     const options = { name: "ToyName" };
     const result = await toysCollection.createIndex(indexKeys, options);
+
+    //get testimony data to database
+    app.get("/testimony", async (req, res) => {
+      const cursor = testimonyCollection.find({});
+      const testimony = await cursor.toArray();
+      res.send(testimony);
+    });
 
     //add toy data to database
     app.post("/addToy", async (req, res) => {
@@ -64,7 +72,7 @@ async function run() {
         return;
       }
 
-      const cursor = toysCollection.find({}, options);
+      const cursor = toysCollection.find({}, options).limit(20);
       const toys = await cursor.toArray();
       res.send(toys);
     });
